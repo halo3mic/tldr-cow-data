@@ -1,4 +1,10 @@
-# Datasets
+# Simulating Intents
+
+The datasets outlined below are used to analyze the coincidence of wants peer-to-peer by converting on-chain trades to intents, and looking at the price improvement in execution. For each of the multiple datasets utilized in the empirical analysis, the metadata and instructions on how to pull the datasets are outlined below.
+
+The dataset is curated by Miha Lotrič, and is part of the [TLDR 2025 fellowship program](https://www.thelatestindefi.org/fellowships).
+
+Note that the repo contains data before quality checks were done, thus it could include trades that were invalidly indexed - do quality checks yourself and filter suspicious trades yourself!  
 
 ## [Trades](../data/trades/)
 
@@ -6,12 +12,12 @@
 
 Blockchain trades fetched from Dune Analytics with query [trades.dune.sql](../queries/trades.dune.sql).
 
-Query sources trades from `dex_aggregator.trades`, `dex.trades`, `oneinch.swaps` and custom query for UniswapX fills.
-Trades from `dex_aggregator.trades` and `dex.trades` are filtered to only ones where sender of the transaction equals protocol's address; with exception of CowSwap, Bebob and 0x Settler.   
+Query sources trades from `dex_aggregator.trades` and `dex.trades`.
+Trades from `dex_aggregator.trades` and `dex.trades` are filtered to only ones where recipient of the transaction equals on of the whitelisted routers in [Flashbots' Router Labels query](https://dune.com/queries/3004150). Cowswap trades are ignored.
 
-Each directory contains metadata file describing parameters used when fetching the data: `chain`, `date_from`, `date_to` and `tokens`.
+Each directory contains metadata file describing parameters used when fetching the data: `chain`, `date_from`, `date_to` and `pairs`.
 
-### Data Format
+## Data Format
 
 parquet
 
@@ -30,12 +36,13 @@ parquet
 ### Collection
 
 Data can be programmatically collected by running the script as shown below:
+
 ```bash
-python -m utils.dune.trades --tokens weth,usdc,wbtc --date-from "2025-03-01 00:00:00" --date-to "2025-03-23 00:00:00" --chain ethereum --performance medium --out-dir data/hist-trades --label ethereum-mar25-1
+python -m utils.dune.trades --date-from "2025-03-01 00:00:00" --date-to "2025-03-23 00:00:00" --chain ethereum --performance medium --out-dir data/hist-trades --label ethereum-mar25-1
 ```
 
 Parameters:
-- `--tokens`: List of supported token symbols or addresses
+- `--pairs`: List of pairs to fetch the data for
 - `--date-from`: Start date in format "YYYY-MM-DD HH:MM:SS" 
 - `--date-to`: End date in format "YYYY-MM-DD HH:MM:SS"
 - `--result-limit`: Maximum number of rows to fetch (default: 600,000)
@@ -170,7 +177,7 @@ python -m utils.dune.fusion_fills --tokens weth,usdc,wbtc --date-from "2024-12-1
 ```
 
 
-## [Prices](../data/prices)
+## [Daily Prices](../data/prices/daily_dune_prices)
 
 ### Description
 
@@ -200,6 +207,32 @@ python -m utils.dune.prices --tokens weth,usdc,wbtc --date-from "2024-12-18" --d
 ```
 
 
-### [Normalized Intents](../data/prices) 
+## [Block-by-block Prices](../data/prices/block_pool_prices)
 
-TBD
+### Description
+
+Token price candles fetched from Dune Analytics using query [prices.dune.sql](../queries/prices.dune.sql).
+Query sources prices from Dune's table `prices.usd_daily`.
+
+Each directory contains metadata file describing parameters used when fetching the data:
+* `chain_id`: Chain prices were fetched for 
+* `start_block` and `end_block`: Block range for the prices
+* `sources`: Which sources were used to obtain the prices
+* `precision`: Precision factor, eg. if it is 15, then divide the prices by 10^15 to obtain the actual price 
+
+### Data Format 
+
+parquet
+
+### Schema
+
+* block_num[Uint64]
+* block_timestamp[Uint64]
+* source[String]
+* price[String]
+* quote_token[String]
+* base_token[String]
+
+### Collection
+
+Data can be programmatically collected by using the PoolPriceFetcher tooling you can find [here](utils-rs/pool-price-fetcher).
