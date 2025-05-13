@@ -1,0 +1,3 @@
+[submodule "utils-rs/pool-price-fetcher"]
+	path = utils-rs/pool-price-fetcher
+	url = https://github.com/halo3mic/pool-price-fetcher

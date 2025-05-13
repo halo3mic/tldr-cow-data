@@ -1,0 +1,7 @@
+*.ipynb linguist-vendored
+data/intents/cowswap/cowswap_mainnet.parquet filter=lfs diff=lfs merge=lfs -text
+data/intents/fusion/data_42161.jsonl filter=lfs diff=lfs merge=lfs -text
+data/intents/fusion/data_1.jsonl filter=lfs diff=lfs merge=lfs -text
+data/normalized-trades/eth_trades.parquet filter=lfs diff=lfs merge=lfs -text
+*.parquet filter=lfs diff=lfs merge=lfs -text
+*.jsonl filter=lfs diff=lfs merge=lfs -text
