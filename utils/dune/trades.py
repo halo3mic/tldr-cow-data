@@ -27,7 +27,8 @@ def get_dex_trades(
 		date_from: str = DATE_FROM,
 		date_to: str = DATE_TO,
 		chain: str = CHAIN,
-        performance: str = PERFORMANCE
+        performance: str = PERFORMANCE,
+        allowed_rel_diff: float = 0.03,
 	):
     date_from = dune_utils.parse_date_str(date_from)
     date_to = dune_utils.parse_date_str(date_to)
@@ -38,13 +39,11 @@ def get_dex_trades(
 			QueryParameter.date_type(name="date_from", value=date_from),
 			QueryParameter.date_type(name="date_to", value=date_to),
 			QueryParameter.text_type(name="pair_whitelist", value=pairs),
-			QueryParameter.text_type(name="chain", value=chain)
+			QueryParameter.text_type(name="chain", value=chain),
+            QueryParameter.text_type(name="allowed_rel_diff", value=allowed_rel_diff),
 		]
     )
-
-    return dune.get_latest_result(QUERY_ID, max_age_hours=1) 
-
-    # return dune.run_query(query=query, performance=performance)
+    return dune.run_query(query=query, performance=performance)
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Fetch DEX trades data from Dune Analytics")
